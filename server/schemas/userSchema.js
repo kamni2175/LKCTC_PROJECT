@@ -13,6 +13,8 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    notificationToken: String,
+    phoneNumber: Number,
   },
   { timestamps: true }
 );

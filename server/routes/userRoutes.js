@@ -10,7 +10,8 @@ const router = express.Router();
 router.post("/register", async (req, res) => {
   try {
     // validation
-    const { name, email, password, department, role } = req.body;
+    const { name, email, password, department, role, notificationToken } =
+      req.body;
     console.log(req.body);
     if (!name || !email || !password || !department || !role) {
       return res.send({ success: false, message: "Please enter all fields" });
@@ -34,6 +35,7 @@ router.post("/register", async (req, res) => {
       password: hashedPass,
       department,
       role,
+      notificationToken,
     });
 
     // save user to database
@@ -58,7 +60,7 @@ router.post("/register", async (req, res) => {
 
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, notificationToken } = req.body;
     if (!email || !password) {
       return res.send({ success: false, message: "Please enter all fields" });
     }
@@ -81,6 +83,11 @@ router.post("/login", async (req, res) => {
     // generate token
 
     const token = jwt.sign({ user }, JWT_SECRET, { expiresIn: "100d" });
+
+    user.notificationToken = notificationToken;
+
+    await user?.save();
+
     return res.send({
       success: true,
       token,
@@ -116,7 +123,7 @@ router.get("/get-all-users", isAuthenticate, async (req, res) => {
       });
     }
 
-    const users = await Users.find();
+    const users = await Users.find().sort({ createdAt: -1 });
 
     return res.send({ success: true, message: "users found", users: users });
   } catch (error) {

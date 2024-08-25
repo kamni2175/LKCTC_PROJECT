@@ -1,4 +1,4 @@
-import { View, Text, ActivityIndicator } from "react-native";
+import { View, Text, ActivityIndicator, TouchableOpacity } from "react-native";
 import React, { useEffect, useState } from "react";
 import Login from "./components/Login";
 import Register from "./components/Register";
@@ -216,15 +216,6 @@ const App = () => {
               ></Stack.Screen>
             </Stack.Navigator>
           )}
-
-          {/* {!user?.isVarified && (
-            <Stack.Navigator>
-              <Stack.Screen
-                name="status"
-                component={VarifiedStatus}
-              ></Stack.Screen>
-            </Stack.Navigator>
-          )} */}
         </NavigationContainer>
       )}
     </View>

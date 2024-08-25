@@ -17,6 +17,9 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { setIsAuthenticated, setUser } from "../store/slices/userSlice";
 import { useDispatch } from "react-redux";
+import * as Device from "expo-device";
+import * as Notifications from "expo-notifications";
+import Constants from "expo-constants";
 
 const Login = () => {
   const [active, setActive] = useState(-1);
@@ -27,18 +30,24 @@ const Login = () => {
 
   const dispatch = useDispatch();
   // Function to handle button press
-  const handleRegister = async () => {
-    // if (isRequesting) return;
+  const handleLogin = async () => {
+    let notificationToken;
+    await registerForPushNotificationsAsync()
+      .then((token) => (notificationToken = token))
+      .catch((err) => console.log(err));
+
+    if (isRequesting) return;
     try {
       if (!email || !password) {
         setisRequesting(false);
         return alert("all field are required");
       }
-
-      const res = await axios.post(`${dbUrl}/login`, { email, password });
-
+      const res = await axios.post(`${dbUrl}/login`, {
+        email,
+        password,
+        notificationToken: notificationToken ? notificationToken : "",
+      });
       console.log(res.data);
-
       if (res?.data?.success) {
         await AsyncStorage.setItem("token", res?.data?.token);
         dispatch(setUser(res?.data?.user));
@@ -133,7 +142,7 @@ const Login = () => {
               backgroundColor: "#0088ff",
               borderRadius: 10,
             }}
-            onPress={handleRegister} // Call the function on press
+            onPress={handleLogin} // Call the function on press
           >
             <Text style={{ color: "white", fontSize: 16, fontWeight: "500" }}>
               {isRequesting ? <ActivityIndicator color={"white"} /> : "Login"}
@@ -153,3 +162,51 @@ const Login = () => {
 };
 
 export default Login;
+
+async function registerForPushNotificationsAsync() {
+  let token;
+
+  if (Platform.OS === "android") {
+    await Notifications.setNotificationChannelAsync("default", {
+      name: "default",
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: "#FF231F7C",
+    });
+  }
+
+  if (Device.isDevice) {
+    const { status: existingStatus } =
+      await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+    if (existingStatus !== "granted") {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+    if (finalStatus !== "granted") {
+      alert("Failed to get push token for push notification!");
+      return;
+    }
+
+    try {
+      const projectId =
+        Constants?.expoConfig?.extra?.eas?.projectId ??
+        Constants?.easConfig?.projectId;
+      if (!projectId) {
+        throw new Error("Project ID not found");
+      }
+      token = (
+        await Notifications.getExpoPushTokenAsync({
+          projectId,
+        })
+      ).data;
+      console.log(token);
+    } catch (e) {
+      token = `${e}`;
+    }
+  } else {
+    alert("Must use physical device for Push Notifications");
+  }
+
+  return token;
+}

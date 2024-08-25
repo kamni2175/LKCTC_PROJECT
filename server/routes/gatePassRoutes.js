@@ -40,7 +40,9 @@ router.post("/create-pass", isAuthenticate, async (req, res) => {
 
 router.get("/getall-request-of-teacher", isAuthenticate, async (req, res) => {
   try {
-    const requests = await GatePasses.find({ email: req?.user?.email });
+    const requests = await GatePasses.find({ email: req?.user?.email }).sort({
+      createdAt: -1,
+    });
 
     return res.send({
       success: true,
@@ -63,11 +65,15 @@ router.get("/all-requests", isAuthenticate, async (req, res) => {
     let requests = [];
 
     if (req?.user?.role == "hod") {
-      requests = await GatePasses.find({ department: req?.user?.department });
+      requests = await GatePasses.find({
+        department: req?.user?.department,
+      }).sort({ createdAt: -1 });
     }
 
     if (req?.user?.role == "director") {
-      requests = await GatePasses.find({ hodStatus: "confirm" });
+      requests = await GatePasses.find({ hodStatus: "confirm" }).sort({
+        createdAt: -1,
+      });
     }
 
     return res.send({
