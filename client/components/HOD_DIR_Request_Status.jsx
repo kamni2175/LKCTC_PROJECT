@@ -4,43 +4,46 @@ import {
   StatusBar,
   Dimensions,
   TouchableOpacity,
-  Linking,
   Image,
 } from "react-native";
-import React from "react";
-import { collegeName, secondaryClor } from "../utils";
+import React, { useEffect } from "react";
+import { collegeName, formatDate, formatTime, secondaryClor } from "../utils";
 import { ScrollView } from "react-native-gesture-handler";
-import { AntDesign, Feather, FontAwesome } from "@expo/vector-icons";
-import { useDispatch, useSelector } from "react-redux";
-import { setIsAuthenticated, setUser } from "../store/slices/userSlice";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
+import { useSelector } from "react-redux";
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import PendingRequests_Admin from "./admins/PendingRequests_Admin";
+import Registrations_Admin from "./admins/Registrations_Admin";
 
-const Profile = () => {
+const HOD_DIR_Request_Status = () => {
   const { height, width } = Dimensions.get("window");
-  const { user } = useSelector((state) => state.user);
-  const dispatch = useDispatch();
+  const { user, allRequests } = useSelector((state) => state.user);
+
+  const Tab = createMaterialTopTabNavigator();
+
   return (
-    <View style={{ flex: 1, position: "relative" }}>
-      <StatusBar backgroundColor={secondaryClor} />
+    <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, position: "relative" }}>
+        <StatusBar backgroundColor={secondaryClor} />
 
-      <View
-        style={{
-          height: "30%",
-          backgroundColor: secondaryClor,
-          borderBottomRightRadius: 20,
-          borderBottomLeftRadius: 20,
-        }}
-      ></View>
+        <View
+          style={{
+            height: "30%",
+            backgroundColor: secondaryClor,
+            borderBottomRightRadius: 20,
+            borderBottomLeftRadius: 20,
+          }}
+        ></View>
 
-      <View
-        style={{
-          top: 0,
-          position: "absolute",
-          width,
-          height,
-        }}
-      >
-        {user?.role == "director" || user?.role == "hod" ? (
+        {/* {allRequests?.length ? ( */}
+
+        <View
+          style={{
+            position: "absolute",
+            width,
+            height,
+          }}
+        >
           <View
             style={{
               flexDirection: "row",
@@ -98,216 +101,225 @@ const Profile = () => {
               </Text>
             </View>
           </View>
-        ) : (
-          <View></View>
-        )}
+          <Tab.Navigator
+            screenOptions={{
+              tabBarStyle: {
+                backgroundColor: secondaryClor,
+                borderColor: "red",
+                width: "95%",
+                alignSelf: "center",
+                borderRadius: 10,
+              },
+            }}
+            style={{ marginTop: "40%" }}
+          >
+            <Tab.Screen
+              options={{
+                tabBarLabel: ({ focused }) => {
+                  return (
+                    <Text style={{ color: focused ? "white" : "gray" }}>
+                      Pending
+                    </Text>
+                  );
+                },
+              }}
+              name="Pending"
+              component={PendingRequests_Admin}
+            ></Tab.Screen>
+
+            {user?.role == "director" && (
+              <Tab.Screen
+                options={{
+                  tabBarLabel: ({ focused }) => {
+                    return (
+                      <Text style={{ color: focused ? "white" : "gray" }}>
+                        Registrations
+                      </Text>
+                    );
+                  },
+                }}
+                name="Registrations"
+                component={Registrations_Admin}
+              ></Tab.Screen>
+            )}
+            <Tab.Screen
+              options={{
+                tabBarLabel: ({ focused }) => {
+                  return (
+                    <Text style={{ color: focused ? "white" : "gray" }}>
+                      History
+                    </Text>
+                  );
+                },
+              }}
+              name="History"
+              component={Pending}
+            ></Tab.Screen>
+          </Tab.Navigator>
+        </View>
+
+        {/* // boxes */}
+      </View>
+      {/* ) : (
+        <EmptyBox />
+      )} */}
+    </View>
+  );
+};
+
+export default HOD_DIR_Request_Status;
+
+const Pending = (allRequests) => {
+  const { height, width } = Dimensions.get("window");
+
+  return (
+    <View style={{ flex: 1 }}>
+      {allRequests?.length ? (
         <ScrollView style={{ flex: 1, zIndex: 40 }}>
           <Text
             style={{
               marginLeft: 20,
               marginTop: 10,
               fontWeight: "500",
-              fontSize: 19,
+              fontSize: 21,
               color: "white",
             }}
           >
-            Profile
+            All Requests
           </Text>
 
-          <View
-            style={{
-              width: "80%",
-              alignSelf: "center",
-              justifyContent: "center",
-              alignItems: "center",
-              marginTop: 30,
-              backgroundColor: "white",
-              paddingVertical: 15,
-              borderRadius: 10,
-            }}
-          >
-            <Text style={{ color: secondaryClor, fontWeight: "600" }}>
-              Login with :- {user?.email}
-            </Text>
-          </View>
-          {user?.role !== "director" && user?.role !== "hod" ? (
-            <View>
-              <TouchableOpacity
-                onPress={() => {
-                  Linking.openURL(`tel:${9417313393}`);
-                }}
-                style={{
-                  alignItems: "center",
-                  flexDirection: "row",
-                  marginLeft: 20,
-                  marginTop: 40,
-                }}
-              >
-                <Text
-                  style={{ color: "white", fontWeight: "600", fontSize: 17 }}
-                >
-                  {" "}
-                  Call to Director Mr (Name)
+          {/* <View style={{ zIndex: 40, marginTop: 20 }}>
+          {[1,2,3,4,5]?.map((data, i) => (
+            <TouchableOpacity
+              style={{
+                width: "90%",
+                backgroundColor: "#fff",
+                alignSelf: "center",
+                elevation: 7,
+                borderRadius: 15,
+                marginBottom: 10,
+                padding: 10,
+                shadowColor: secondaryClor,
+              }}
+              key={i}
+            >
+              <Text style={{ fontWeight: "500", fontSize: 17 }}>
+                Name:-{" "}
+                <Text style={{ color: secondaryClor }}>
+                  {data?.userName}
                 </Text>
-                <Feather name="phone-call" size={24} color="#32CD32" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => {
-                  Linking.openURL(`tel:${9464046810}`);
-                }}
-                style={{
-                  alignItems: "center",
-                  flexDirection: "row",
-                  marginLeft: 20,
-                  marginTop: 10,
-                }}
-              >
-                <Text
-                  style={{ color: "white", fontWeight: "600", fontSize: 17 }}
-                >
-                  {" "}
-                  Call to head of department (HOD){" "}
+              </Text>
+              <Text style={{ fontWeight: "500", fontSize: 17 }}>
+                Apply Date:-{" "}
+                <Text style={{ color: secondaryClor }}>
+                  {formatDate(data?.date?.toString())}
                 </Text>
-                <Feather name="phone-call" size={24} color="#32CD32" />
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <View></View>
-          )}
-          <View
-            style={{ width: "90%", alignSelf: "center", alignItems: "center" }}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginTop: 70,
-                width: "90%",
-                // borderWidth: 1,
-                paddingHorizontal: 10,
-                paddingVertical: 10,
-                borderRadius: 10,
-                borderColor: secondaryClor,
-                elevation: 5,
-                shadowColor: secondaryClor,
-                backgroundColor: "white",
-                marginBottom: 15,
-                gap: 10,
-              }}
-            >
-              <Feather name="user" size={24} color={secondaryClor} />
-              <Text>{user?.name}</Text>
-            </View>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                width: "90%",
-                // borderWidth: 1,
-                paddingHorizontal: 10,
-                paddingVertical: 10,
-                borderRadius: 10,
-                borderColor: secondaryClor,
-                elevation: 5,
-                shadowColor: secondaryClor,
-                backgroundColor: "white",
-                marginBottom: 15,
-                gap: 10,
-              }}
-            >
-              <Feather name="mail" size={24} color={secondaryClor} />
-              <Text>{user?.email}</Text>
-            </View>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                width: "90%",
-                // borderWidth: 1,
-                paddingHorizontal: 10,
-                paddingVertical: 10,
-                borderRadius: 10,
-                borderColor: secondaryClor,
-                elevation: 5,
-                shadowColor: secondaryClor,
-                backgroundColor: "white",
-                marginBottom: 15,
-                gap: 10,
-              }}
-            >
-              <FontAwesome name="building-o" size={24} color={secondaryClor} />
-              <Text>{user?.department}</Text>
-            </View>
-            <View
-              style={{
-                flexDirection: "row",
-                gap: 10,
-              }}
-            >
-              <View
-                style={{
-                  width: "43%",
-                  height: 50,
-                  borderRadius: 10,
-                  backgroundColor: secondaryClor,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  elevation: 10,
-                }}
-              >
+              </Text>
+              <Text style={{ fontWeight: "500", fontSize: 17 }}>
+                Exit time:-{" "}
+                <Text style={{ color: secondaryClor }}>
+                  {formatTime(data?.exitTime?.toString())}
+                </Text>
+              </Text>
+              <Text style={{ fontWeight: "500", fontSize: 17 }}>
+                Return time:-{" "}
+                <Text style={{ color: secondaryClor }}>
+                  {formatTime(data?.returnTime?.toString())}
+                </Text>
+              </Text>
+              <Text style={{ fontWeight: "500", fontSize: 17 }}>
+                Department :-{" "}
+                <Text style={{ color: secondaryClor }}>
+                  {data?.department}
+                </Text>
+              </Text>
+              <Text style={{ fontWeight: "500", fontSize: 17 }}>
+                Status :-
+                <Text style={{ color: secondaryClor }}>
+                  {" "}
+                  {data?.hodStatus == "pending" ||
+                  data?.directorStatus == "pending"
+                    ? "pending"
+                    : "Confirmed"}
+                </Text>
+              </Text>
+              <Text></Text>
+
+              <View style={{ flexDirection: "row" }}>
                 <View
                   style={{
-                    flexDirection: "row",
-                    alignItems: "center",
+                    width: "40%",
+                    height: 35,
+                    backgroundColor: "red",
+                    borderRadius: 10,
                     justifyContent: "center",
-                    gap: 3,
+                    alignItems: "center",
+                    marginLeft: "auto",
                   }}
                 >
-                  <Text
-                    style={{ color: "white", fontWeight: "500", fontSize: 16 }}
-                  >
-                    Edit
-                  </Text>
+                  <Text style={{ color: "white" }}>Cancel</Text>
                 </View>
               </View>
-              <TouchableOpacity
-                onPress={async () => {
-                  await AsyncStorage.removeItem("token");
-
-                  dispatch(setUser(undefined));
-                  dispatch(setIsAuthenticated(false));
-                }}
-                style={{
-                  width: "43%",
-                  height: 50,
-                  borderRadius: 10,
-                  backgroundColor: "white",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  borderWidth: 1,
-                  borderColor: secondaryClor,
-
-                  elevation: 10,
-                }}
-              >
-                <Text
-                  style={{
-                    color: secondaryClor,
-                    fontWeight: "500",
-                    fontSize: 16,
-                  }}
-                >
-                  Log Out
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+            </TouchableOpacity>
+          ))}
+        </View> */}
         </ScrollView>
-      </View>
-
-      {/* // boxes */}
+      ) : (
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <View
+            style={{
+              width: "85%",
+              height: 170,
+              backgroundColor: "#FFF",
+              elevation: 10,
+              borderRadius: 15,
+              alignItems: "center",
+              padding: 5,
+              justifyContent: "center",
+              shadowColor: secondaryClor,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: "800",
+                color: secondaryClor,
+              }}
+            >
+              Request list is empty
+            </Text>
+          </View>
+        </View>
+      )}
     </View>
   );
 };
 
-export default Profile;
+const EmptyBox = () => {
+  return (
+    <View>
+      <Text
+        style={{
+          justifyContent: "center",
+          flex: 1,
+          alignItems: "center",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backgroundColor: "gray",
+          zIndex: 40,
+        }}
+      >
+        Requests
+      </Text>
+    </View>
+  );
+};

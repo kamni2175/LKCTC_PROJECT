@@ -6,14 +6,16 @@ import { LinearGradient } from "expo-linear-gradient";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { ScrollView } from "react-native";
 import Requests from "./Requests";
-import History from "./Profile";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import Profile from "./Profile";
 import { useNavigation } from "@react-navigation/native";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import { useSelector } from "react-redux";
+import HOD_DIR_Request_Status from "./HOD_DIR_Request_Status";
 
 const HomePage = () => {
   const { height } = Dimensions.get("screen");
+  const { user } = useSelector((state) => state.user);
   const navigation = useNavigation();
   return (
     <View style={{ flex: 1 }}>
@@ -97,7 +99,7 @@ const HomePage = () => {
             }}
           >
             <Text style={{ fontSize: 17, fontWeight: "500" }}>
-              Apply for gate{" "}
+              {user?.role == "teacher" ? "Apply for gate" : "Welcome"}
               <Text
                 style={{
                   color: secondaryClor,
@@ -105,7 +107,7 @@ const HomePage = () => {
                   fontWeight: "900",
                 }}
               >
-                pass
+                {user?.role == "teacher" ? " pass" : " !"}
               </Text>
             </Text>
           </View>
@@ -124,36 +126,42 @@ const HomePage = () => {
           <View
             style={{ flexDirection: "row", justifyContent: "space-evenly" }}
           >
-            <View
-              style={{
-                width: "45%",
-                height: 60,
-                borderRadius: 10,
-                backgroundColor: secondaryClor,
-                justifyContent: "center",
-                alignItems: "center",
-                elevation: 10,
-              }}
-            >
-              <TouchableOpacity onPress={() => navigation.navigate("apply")}>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 3,
-                  }}
-                >
-                  <Text
-                    style={{ color: "white", fontWeight: "500", fontSize: 16 }}
+            {user?.role == "teacher" && (
+              <View
+                style={{
+                  width: "45%",
+                  height: 60,
+                  borderRadius: 10,
+                  backgroundColor: secondaryClor,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  elevation: 10,
+                }}
+              >
+                <TouchableOpacity onPress={() => navigation.navigate("apply")}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 3,
+                    }}
                   >
-                    Click to apply...
-                  </Text>
+                    <Text
+                      style={{
+                        color: "white",
+                        fontWeight: "500",
+                        fontSize: 16,
+                      }}
+                    >
+                      Click to apply...
+                    </Text>
 
-                  <AntDesign name="form" size={24} color="white" />
-                </View>
-              </TouchableOpacity>
-            </View>
+                    <AntDesign name="form" size={24} color="white" />
+                  </View>
+                </TouchableOpacity>
+              </View>
+            )}
             <View
               style={{
                 width: "45%",
@@ -320,6 +328,7 @@ const HomePage = () => {
 const Tab = createBottomTabNavigator();
 
 const Home = () => {
+  const { user } = useSelector((state) => state.user);
   return (
     <Tab.Navigator
       screenOptions={{
@@ -356,22 +365,41 @@ const Home = () => {
         name="home"
         component={HomePage}
       />
-      <Tab.Screen
-        options={{
-          tabBarShowLabel: false,
-          tabBarIcon: ({ focused }) => (
-            // <Text style={{ color: focused ? primaryColor : "black" }}>nj</Text>
+      {user?.role == "hod" || user?.role == "director" ? (
+        <Tab.Screen
+          options={{
+            tabBarShowLabel: false,
+            tabBarIcon: ({ focused }) => (
+              <Feather
+                name="list"
+                size={34}
+                color={focused ? primaryColor : "black"}
+              />
+            ),
+          }}
+          name="requests"
+          component={HOD_DIR_Request_Status}
+        />
+      ) : null}
 
-            <Feather
-              name="list"
-              size={34}
-              color={focused ? primaryColor : "black"}
-            />
-          ),
-        }}
-        name="requests"
-        component={Requests}
-      />
+      {user?.role == "teacher" && (
+        <Tab.Screen
+          options={{
+            tabBarShowLabel: false,
+            tabBarIcon: ({ focused }) => (
+              // <Text style={{ color: focused ? primaryColor : "black" }}>nj</Text>
+
+              <Feather
+                name="list"
+                size={34}
+                color={focused ? primaryColor : "black"}
+              />
+            ),
+          }}
+          name="requests"
+          component={Requests}
+        />
+      )}
       <Tab.Screen
         options={{
           tabBarShowLabel: false,
