@@ -44,7 +44,7 @@ const Requests = () => {
         setisRequesting(false);
         dispatch(removeSingleRequest(gatePassid));
       }
-      alert(res.data?.message);
+      alert("Request deleted!");
 
       setisRequesting(false);
     } catch (error) {
@@ -91,7 +91,7 @@ const Requests = () => {
                 All Requests
               </Text>
 
-              <View style={{ zIndex: 40, marginTop: 40 }}>
+              <View style={{ zIndex: 40, marginTop: 40, marginBottom: 75 }}>
                 {allRequests?.map((data, i) => (
                   <View
                     style={{
@@ -139,39 +139,49 @@ const Requests = () => {
                     <Text style={{ fontWeight: "500", fontSize: 17 }}>
                       Status :-
                       <Text style={{ color: secondaryClor }}>
-                        {" "}
-                        {data?.hodStatus == "pending" ||
-                        data?.directorStatus == "pending"
-                          ? "pending"
-                          : "Confirmed"}
+                        {data?.directorStatus == " cancel" ||
+                        data?.hodStatus == "cancel" ? (
+                          "Cancel"
+                        ) : (
+                          <Text>
+                            {data?.hodStatus == "pending" ||
+                            data?.directorStatus == "pending"
+                              ? "pending"
+                              : "Confirmed"}
+                          </Text>
+                        )}
                       </Text>
                     </Text>
 
-                    {data?.hodStatus == "confirm" ||
-                      (data?.directorStatus !== "confirm" && (
-                        <View style={{ flexDirection: "row" }}>
-                          <TouchableOpacity
-                            onPress={() => handleCanelRequest(data?._id)}
-                            style={{
-                              width: "50%",
-                              height: 40,
-                              backgroundColor: secondaryClor,
-                              borderRadius: 10,
-                              justifyContent: "center",
-                              alignItems: "center",
-                              marginLeft: "auto",
-                            }}
-                          >
-                            <Text style={{ color: "white" }}>
-                              {isRequesting ? (
-                                <ActivityIndicator color={"white"} />
-                              ) : (
-                                "Cancel"
-                              )}
-                            </Text>
-                          </TouchableOpacity>
-                        </View>
-                      ))}
+                    {data?.hodStatus !== "cancel" && (
+                      <View>
+                        {data?.hodStatus == "confirm" ||
+                          (data?.directorStatus !== "confirm" && (
+                            <View style={{ flexDirection: "row" }}>
+                              <TouchableOpacity
+                                onPress={() => handleCanelRequest(data?._id)}
+                                style={{
+                                  width: "50%",
+                                  height: 40,
+                                  backgroundColor: secondaryClor,
+                                  borderRadius: 10,
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                  marginLeft: "auto",
+                                }}
+                              >
+                                <Text style={{ color: "white" }}>
+                                  {isRequesting ? (
+                                    <ActivityIndicator color={"white"} />
+                                  ) : (
+                                    "Cancel"
+                                  )}
+                                </Text>
+                              </TouchableOpacity>
+                            </View>
+                          ))}
+                      </View>
+                    )}
                   </View>
                 ))}
               </View>

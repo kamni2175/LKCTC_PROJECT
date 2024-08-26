@@ -200,11 +200,11 @@ const Card = ({ user, handleVerifyUser }) => {
                 }}
               >
                 <Text style={{ fontSize: 16, fontWeight: "500" }}>
-                  {isRequesting ? (
+                  {/* {isRequesting ? (
                     <ActivityIndicator color={secondaryClor} />
                   ) : (
                     "Cancel"
-                  )}
+                  )} */}
                 </Text>
               </View>
               <TouchableOpacity

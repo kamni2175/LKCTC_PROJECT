@@ -1,6 +1,8 @@
 const express = require("express");
 const { isAuthenticate } = require("../middlewares/isAuthenticate");
 const GatePasses = require("../schemas/gatePass");
+const Users = require("../schemas/userSchema");
+const { sendPushNotification } = require("../utils");
 const router = express.Router();
 
 router.post("/create-pass", isAuthenticate, async (req, res) => {
@@ -27,6 +29,26 @@ router.post("/create-pass", isAuthenticate, async (req, res) => {
     });
 
     await newGatePass.save();
+
+    // finding hod data and send push notification
+    const hod = await Users.findOne({
+      department: req?.user?.department,
+      role: "hod",
+    });
+
+    if (
+      hod &&
+      hod?.department == req?.user?.department &&
+      hod?.notificationToken
+    ) {
+      console.log("notification send");
+      sendPushNotification(
+        hod?.notificationToken,
+        "GATE PASS REQUEST!",
+        `Respected HOD you have new gate pass request from ${req?.user?.name}`,
+        { key: "value" }
+      );
+    }
 
     return res.send({
       success: true,
@@ -100,9 +122,56 @@ router.post("/update-status-of-pass", isAuthenticate, async (req, res) => {
 
     if (req?.user?.role == "hod") {
       gatepass.hodStatus = status;
+
+      if (status == "cancel") {
+        gatepass.directorStatus = status;
+
+        // if request is cancel then find user of request and send it notification
+        const user = await Users.findOne({ email: gatepass?.email });
+        if (user && user?.notificationToken) {
+          sendPushNotification(
+            user?.notificationToken,
+            "GATE DENIED!",
+            `${user?.name} your request is cancel!`,
+            { key: "value" }
+          );
+        }
+      }
+
+      // sending notification to director
+      if (status == "confirm") {
+        const director = await Users.findOne({
+          role: "director",
+        });
+
+        if (director && director?.notificationToken) {
+          console.log("notification send");
+          sendPushNotification(
+            director?.notificationToken,
+            "GATE PASS REQUEST!",
+            `Respected Director you have new gate pass request!`,
+            { key: "value" }
+          );
+        }
+      }
     }
     if (req?.user?.role == "director") {
       gatepass.directorStatus = status;
+
+      if (status == "cancel") gatepass.hodStatus = status;
+
+      // find user of request and send notiication of request has accepted
+      const ussr = await Users.findOne({ email: gatepass?.email });
+
+      if (ussr && ussr?.notificationToken) {
+        console.log("notification send");
+        sendPushNotification(
+          ussr?.notificationToken,
+          "REQUEST ACCEPTED!",
+          `${ussr?.name} your request is ${status} `,
+          { key: "value" }
+        );
+      }
     }
 
     await gatepass?.save();

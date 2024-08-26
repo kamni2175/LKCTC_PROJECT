@@ -176,6 +176,9 @@ const PendingRequests_Admin = () => {
                             borderWidth: 1,
                             borderColor: secondaryClor,
                           }}
+                          onPress={() => {
+                            handleChangeRequest("cancel", data?._id);
+                          }}
                         >
                           <Text
                             style={{
@@ -241,6 +244,9 @@ const PendingRequests_Admin = () => {
                               alignItems: "center",
                               borderWidth: 1,
                               borderColor: secondaryClor,
+                            }}
+                            onPress={() => {
+                              handleChangeRequest("cancel", data?._id);
                             }}
                           >
                             <Text
