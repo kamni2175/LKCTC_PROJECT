@@ -233,7 +233,7 @@ const HomePage = () => {
                 width: 4,
                 height: 40,
                 backgroundColor: primaryColor,
-                marginLeft: "3.5%",
+                marginLeft: 12,
                 top: -1,
               }}
             ></Text>
@@ -279,7 +279,7 @@ const HomePage = () => {
                 width: 4,
                 height: 40,
                 backgroundColor: primaryColor,
-                marginLeft: "3.5%",
+                marginLeft: 12,
                 top: -3,
               }}
             ></Text>
